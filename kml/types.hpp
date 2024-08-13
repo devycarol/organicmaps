@@ -8,6 +8,8 @@
 #include "base/internal/message.hpp"  // DebugPrint(Timestamp)
 #include "base/visitor.hpp"
 
+#include "platform/location.hpp"
+
 #include <string>
 #include <vector>
 
@@ -326,6 +328,7 @@ struct MultiGeometry
   }
 
   void FromPoints(std::vector<m2::PointD> const & points);
+  void FromGpsInfoPoints(std::vector<location::GpsTrackInfo> const & points);
   void Assign(std::initializer_list<geometry::PointWithAltitude> lst)
   {
     m_lines.emplace_back();

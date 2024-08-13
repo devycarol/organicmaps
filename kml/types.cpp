@@ -49,4 +49,13 @@ MultiGeometry mergeGeometry(std::vector<MultiGeometry> && aGeometries)
   return merged;
 }
 
+void MultiGeometry::FromGpsInfoPoints(std::vector<location::GpsTrackInfo> const & points)
+{
+  LineT line;
+  for (auto const & pt : points)
+    line.emplace_back(mercator::FromLatLon(pt.m_latitude, pt.m_longitude));
+
+  ASSERT(line.size() > 1, ());
+  m_lines.push_back(std::move(line));
+}
 }  // namespace kml
