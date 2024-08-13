@@ -3,6 +3,7 @@
 #include "map/user_mark.hpp"
 #include "map/user_mark_id_storage.hpp"
 #include "map/track_mark.hpp"
+#include "map/gps_tracker.hpp"
 
 #include "drape_frontend/drape_engine.hpp"
 #include "drape_frontend/selection_shape.hpp"
@@ -1092,6 +1093,53 @@ kml::CompilationType BookmarkManager::GetCompilationType(kml::MarkGroupId id) co
   auto const compilation = m_compilations.find(id);
   CHECK(compilation != m_compilations.cend(), ());
   return compilation->second->GetCategoryData().m_type;
+}
+
+void BookmarkManager::SaveTrackRecording(std::string const & name)
+{
+  CHECK_THREAD_CHECKER(m_threadChecker, ());
+  auto const & tracker = GpsTracker::Instance();
+  CHECK(tracker.IsRecentTrackCollectionInitialized(), ("Track should be initialized"));
+  std::vector<location::GpsTrackInfo> recentTrack = tracker.GetRecentTrackCollection();
+  CHECK(!recentTrack.empty(), ("Recorded track should not be empty"));
+
+  kml::TrackData trackData;
+  std::string trackName = name.empty() ? GenerateTrackRecordingName() : name;
+  kml::SetDefaultStr(trackData.m_name, trackName);
+
+  struct kml::MultiGeometry m_geometry;
+  m_geometry.FromGpsInfoPoints(recentTrack);
+  trackData.m_geometry = std::move(m_geometry);
+
+  struct kml::ColorData colorData;
+  colorData.m_rgba = GenerateTrackRecordingColor().GetRGBA();
+  struct kml::TrackLayer layer;
+  layer.m_color = colorData;
+
+  std::vector<kml::TrackLayer> m_layers;
+  m_layers.emplace_back(layer);
+  trackData.m_layers = std::move(m_layers);
+  trackData.m_timestamp = kml::TimestampClock::now();
+
+  auto editSession = GetEditSession();
+  auto const track = editSession.CreateTrack(std::move(trackData));
+  auto const groupId = LastEditedBMCategory();
+  AttachTrack(track->GetId(), groupId);
+}
+
+std::string BookmarkManager::GenerateTrackRecordingName() const
+{
+  /// @todo: - improve the track name generation
+  auto const track = platform::GetLocalizedString("track_recording");
+  auto const date = platform::GetLocalizedMyPositionBookmarkName();
+  auto const recordingName = track + " " + date;
+  return recordingName;
+}
+
+dp::Color BookmarkManager::GenerateTrackRecordingColor() const
+{
+  /// @todo: - improve the color generation
+  return kml::ColorFromPredefinedColor(kml::GetRandomPredefinedColor());
 }
 
 void BookmarkManager::PrepareBookmarksAddresses(std::vector<SortBookmarkData> & bookmarksForSort,

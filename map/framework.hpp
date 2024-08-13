@@ -433,8 +433,16 @@ private:
   df::OnGraphicsContextInitialized m_onGraphicsContextInitialized;
 
 public:
+  /// @todo Remove this function.
   void ConnectToGpsTracker();
+  /// @todo Remove this function.
   void DisconnectFromGpsTracker();
+
+  void StartTrackRecording();
+  void StopTrackRecording();
+  void StopTrackRecordingAndSaveWithName(std::string const & name);
+  bool IsTrackRecordingEmpty() const;
+  bool IsTrackRecordingEnabled() const;
 
   void SetMapStyle(MapStyle mapStyle);
   void MarkMapStyle(MapStyle mapStyle);

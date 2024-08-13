@@ -1636,6 +1636,7 @@ void Framework::EnableDebugRectRendering(bool enabled)
     m_drapeEngine->EnableDebugRectRendering(enabled);
 }
 
+/// @todo Remove this function.
 void Framework::ConnectToGpsTracker()
 {
   m_connectToGpsTrack = true;
@@ -1646,12 +1647,54 @@ void Framework::ConnectToGpsTracker()
   }
 }
 
+/// @todo Remove this function.
 void Framework::DisconnectFromGpsTracker()
 {
   m_connectToGpsTrack = false;
-  GpsTracker::Instance().Disconnect();
+  auto & tracker = GpsTracker::Instance();
+  tracker.Disconnect();
+  tracker.SetEnabled(false);
   if (m_drapeEngine)
     m_drapeEngine->ClearGpsTrackPoints();
+}
+
+void Framework::StartTrackRecording()
+{
+  auto & tracker = GpsTracker::Instance();
+  if (!tracker.IsEnabled())
+    tracker.SetEnabled(true);
+  m_connectToGpsTrack = true;
+  if (m_drapeEngine)
+  {
+    m_drapeEngine->ClearGpsTrackPoints();
+    tracker.Connect(bind(&Framework::OnUpdateGpsTrackPointsCallback, this, _1, _2));
+  }
+}
+
+void Framework::StopTrackRecording()
+{
+  m_connectToGpsTrack = false;
+  auto & tracker = GpsTracker::Instance();
+  tracker.Disconnect();
+  tracker.SetEnabled(false);
+  if (m_drapeEngine)
+    m_drapeEngine->ClearGpsTrackPoints();
+}
+
+void Framework::StopTrackRecordingAndSaveWithName(std::string const & name)
+{
+  GetBookmarkManager().SaveTrackRecording(name);
+  StopTrackRecording();
+}
+
+bool Framework::IsTrackRecordingEmpty() const
+{
+  return GpsTracker::Instance().IsEmpty();
+}
+
+bool Framework::IsTrackRecordingEnabled() const
+{
+  return GpsTracker::Instance().IsEnabled();
 }
 
 void Framework::OnUpdateGpsTrackPointsCallback(vector<pair<size_t, location::GpsTrackInfo>> && toAdd,
