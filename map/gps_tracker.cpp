@@ -95,6 +95,11 @@ hours GpsTracker::GetDuration() const
   return m_track.GetDuration();
 }
 
+bool GpsTracker::IsEmpty() const
+{
+  return m_track.IsEmpty();
+}
+
 void GpsTracker::Connect(TGpsTrackDiffCallback const & fn)
 {
   m_track.SetCallback(fn);
@@ -110,4 +115,14 @@ void GpsTracker::OnLocationUpdated(location::GpsInfo const & info)
   if (!m_enabled)
     return;
   m_track.AddPoint(info);
+}
+
+bool GpsTracker::IsRecentTrackCollectionInitialized() const
+{
+  return m_track.IsCollectionInit();
+}
+
+vector<location::GpsTrackInfo> GpsTracker::GetRecentTrackCollection() const
+{
+  return m_track.GetCurrentTrack();
 }

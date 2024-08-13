@@ -94,6 +94,14 @@ void GpsTrack::Clear()
   ScheduleTask();
 }
 
+bool GpsTrack::IsEmpty() const
+{
+  if (!m_collection)
+    return true;
+  else
+  return m_collection->IsEmpty();
+}
+
 void GpsTrack::SetDuration(hours duration)
 {
   ASSERT_GREATER(duration.count(), 0, ());
@@ -351,3 +359,27 @@ void GpsTrack::NotifyCallback(pair<size_t, size_t> const & addedIds, pair<size_t
     m_callback(std::move(toAdd), evictedIds);
   }
 }
+
+std::vector<location::GpsTrackInfo> GpsTrack::GetCurrentTrack() const
+{
+  lock_guard<mutex> lg(m_dataGuard);
+  if (!m_collection)
+    return {};
+
+  std::vector<location::GpsTrackInfo> track;
+  track.reserve(m_collection->GetSize());
+  m_collection->ForEach([&track](location::GpsTrackInfo const & point, size_t id)->bool
+  {
+    track.emplace_back(point);
+    return true;
+  });
+
+  return track;
+}
+
+bool GpsTrack::IsCollectionInit() const
+{
+  lock_guard<mutex> lg(m_dataGuard);
+  return m_collection != nullptr;
+}
+

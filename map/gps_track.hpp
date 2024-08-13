@@ -38,6 +38,8 @@ public:
   /// @note Callback is called with 'toRemove' points, if some points were removed.
   void Clear();
 
+  bool IsEmpty() const;
+
   /// Sets tracking duration in hours.
   /// @note Callback is called with 'toRemove' points, if some points were removed.
   /// By default, duration is 24h.
@@ -101,4 +103,7 @@ private:
   bool m_threadExit; // need exit thread
   bool m_threadWakeup; // need wakeup thread
   std::condition_variable m_cv;
+public:
+  std::vector<location::GpsTrackInfo> GetCurrentTrack() const;
+  bool IsCollectionInit() const;
 };
