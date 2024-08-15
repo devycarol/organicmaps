@@ -196,4 +196,24 @@
   return GetFramework().GetDrawScale();
 }
 
++ (void)startTrackRecording {
+  GetFramework().StartTrackRecording();
+}
+
++ (void)stopTrackRecordingWithoutSaving {
+  GetFramework().StopTrackRecording();
+}
+
++ (void)stopTrackRecordingAndSaveWithName:(nullable NSString *)name {
+  return GetFramework().StopTrackRecordingAndSaveWithName(name == nil ? "" : name.UTF8String);
+}
+
++ (BOOL)isTrackRecordingEnabled {
+  return GetFramework().IsTrackRecordingEnabled();
+}
+
++ (BOOL)isTrackRecordingEmpty {
+  return GetFramework().IsTrackRecordingEmpty();
+}
+
 @end
