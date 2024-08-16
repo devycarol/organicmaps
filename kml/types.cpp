@@ -58,4 +58,12 @@ void MultiGeometry::FromGpsInfoPoints(std::vector<location::GpsTrackInfo> const 
   ASSERT(line.size() > 1, ());
   m_lines.push_back(std::move(line));
 }
+
+kml::PredefinedColor GetRandomPredefinedColor()
+{
+  std::srand(static_cast<unsigned int>(std::time(nullptr)));
+  uint8_t randomValue = static_cast<uint8_t>(rand() % (static_cast<uint8_t>(PredefinedColor::Count) - 1)) + 1;
+  return static_cast<PredefinedColor>(randomValue);
+}
+
 }  // namespace kml
